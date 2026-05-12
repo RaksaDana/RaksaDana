@@ -1,0 +1,10 @@
+yfinance
+pandas>=2.2.2
+numpy>=2.0.2
+matplotlib>=3.10.0
+seaborn
+prophet>=1.3.0
+statsmodels
+scikit-learn
+jupyter
+ipykernel
