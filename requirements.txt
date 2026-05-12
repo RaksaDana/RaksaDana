@@ -8,3 +8,5 @@ statsmodels
 scikit-learn
 jupyter
 ipykernel
+tensorflow>=2.11.0
+mlflow>=2.0.0

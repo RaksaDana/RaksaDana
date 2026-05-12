@@ -31,3 +31,7 @@ desktop.ini
 # Env vars
 .env
 *.env
+
+# MLflow
+mlruns/
+mlflow.db
