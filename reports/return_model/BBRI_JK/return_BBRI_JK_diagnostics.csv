@@ -1,0 +1,2 @@
+Ticker,Train Close Min,Train Close Max,Test Close Min,Test Close Max,Test Above Train Max,Test Below Train Min,KS Shift Count,Feature Count
+BBRI.JK,889.6915283203125,4479.91796875,2874.68,5216.7744,64,0,15,15

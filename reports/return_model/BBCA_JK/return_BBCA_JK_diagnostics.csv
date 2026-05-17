@@ -1,0 +1,2 @@
+Ticker,Train Close Min,Train Close Max,Test Close Min,Test Close Max,Test Above Train Max,Test Below Train Min,KS Shift Count,Feature Count
+BBCA.JK,1777.3848876953125,8401.859375,6900.318,10060.581,294,0,15,15
