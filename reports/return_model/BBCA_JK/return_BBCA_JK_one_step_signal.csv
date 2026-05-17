@@ -1,2 +1,0 @@
-Ticker,Signal_Date,Base_Close,Predicted_Next_Log_Return,Predicted_Next_Close,Note
-BBCA.JK,2026-01-19,7736.33251953125,0.0010606421856209636,7744.54248046875,One-step signal only; recursive 30-day forecast intentionally disabled.

@@ -1,4 +1,0 @@
-Ticker,Price_MAPE,Price_R2,Direction_Accuracy,MAPE_Category,Fit_Status,Beats_Naive_DA
-BBCA.JK,1.1806458,0.9615233540534972,48.71287128712871,Sangat Baik (<=10%),Mild overfit,True
-BBRI.JK,1.5298927,0.9747018218040466,44.66403162055336,Sangat Baik (<=10%),Mild overfit,True
-BMRI.JK,1.5210596,0.9747209548950196,46.13861386138614,Sangat Baik (<=10%),Mild overfit,True
