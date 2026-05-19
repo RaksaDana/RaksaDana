@@ -18,7 +18,6 @@ env/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-
 # OS
 .DS_Store
 Thumbs.db
@@ -28,10 +27,20 @@ desktop.ini
 .vscode/
 .idea/
 
-# Env vars
+# Environment variables
 .env
 *.env
 
 # MLflow
 mlruns/
 mlflow.db
+
+# Data (large files — regenerate via notebooks)
+data/raw/
+data/processed/*.pkl
+
+# Trained models (large binaries — regenerate via notebooks)
+models/
+
+# Outputs (regenerate via notebooks)
+outputs/
