@@ -42,5 +42,4 @@ data/processed/*.pkl
 # Trained models (large binaries — regenerate via notebooks)
 models/
 
-# Outputs (regenerate via notebooks)
-outputs/
+# Outputs tracked for portfolio visibility (regenerate via notebooks if needed)
