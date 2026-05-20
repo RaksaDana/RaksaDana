@@ -28,7 +28,7 @@ BUY_THRESHOLD  =  0.005   # predicted return > +0.5% → BUY
 SELL_THRESHOLD = -0.005   # predicted return < -0.5% → SELL
 
 
-# ── helpers ──────────────────────────────────────────────────────────────────
+# helpers
 
 def _safe(ticker: str) -> str:
     return ticker.replace(".", "_")
@@ -106,7 +106,7 @@ def _inv(target_scaler, scaled_pred):
     return float(target_scaler.inverse_transform([[scaled_pred]])[0][0])
 
 
-# ── public API ────────────────────────────────────────────────────────────────
+# public API
 
 def get_available_tickers() -> list:
     return SUPPORTED_TICKERS
