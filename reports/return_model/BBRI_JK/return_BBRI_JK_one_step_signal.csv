@@ -1,2 +1,2 @@
 Ticker,Signal_Date,Base_Close,Predicted_Next_Log_Return,Predicted_Next_Close,Note
-BBRI.JK,2026-01-19,3587.912841796875,8.031149627640843e-05,3588.201171875,One-step signal only; recursive 30-day forecast intentionally disabled.
+BBRI.JK,2026-01-19,3587.912841796875,0.0001186696463264525,3588.3388671875,One-step signal only; recursive 30-day forecast intentionally disabled.
