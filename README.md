@@ -172,5 +172,3 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db
 | Muhammad Akbar Pradana | ML Engineer | Pembangunan Model LSTM, Deployment |
 | Bima Mukhlisin Bil Sajjad | ML Engineer | Evaluasi & Tuning, Kalkulator Profit/Loss |
 | Moch Mizan Ghodafail | Backend Engineer | FastAPI Backend, Integrasi Gemini API |
-
-**Capstone Project PJK-GM021 — Pijak × IBM SkillsBuild**
