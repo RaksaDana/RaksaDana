@@ -1,0 +1,24 @@
+{
+  "ticker": "BBRI.JK",
+  "feature_cols": [
+    "Close_Log_Return_1",
+    "Daily_Return",
+    "Return_3",
+    "Return_5",
+    "Return_10",
+    "Volatility_5",
+    "Volatility_10",
+    "Volatility_20",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_Hist",
+    "BB_width_pct",
+    "Volume_Change",
+    "Volume_Ratio_7",
+    "ROE",
+    "EPS",
+    "DY"
+  ],
+  "window_size": 60
+}

@@ -34,12 +34,3 @@ desktop.ini
 # MLflow
 mlruns/
 mlflow.db
-
-# Data (large files — regenerate via notebooks)
-data/raw/
-data/processed/*.pkl
-
-# Trained models (large binaries — regenerate via notebooks)
-models/
-
-# Outputs tracked for portfolio visibility (regenerate via notebooks if needed)
