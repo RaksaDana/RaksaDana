@@ -153,50 +153,6 @@ metrics = get_metrics("BBCA.JK")
 
 ---
 
-## Deployment
-
-**Platform yang direkomendasikan: HuggingFace Spaces**
-
-Gratis, mendukung Streamlit dan FastAPI (via Docker), dapat menyimpan model file dengan Git LFS.
-
-**Langkah deployment:**
-
-1. Buat akun di [huggingface.co](https://huggingface.co) dan buat Space baru (tipe: Docker atau Streamlit)
-
-2. Install `huggingface_hub`:
-   ```bash
-   pip install huggingface_hub
-   ```
-
-3. Upload model artifacts ke HuggingFace Hub:
-   ```python
-   from huggingface_hub import HfApi
-   api = HfApi()
-   api.upload_folder(
-       folder_path="models/return_model",
-       repo_id="username/raksa-dana-models",
-       repo_type="model",
-   )
-   ```
-
-4. Di `src/inference.py`, tambahkan auto-download model jika tidak ada lokal:
-   ```python
-   from huggingface_hub import hf_hub_download
-   # Download model jika belum ada
-   if not model_path.exists():
-       hf_hub_download(repo_id="username/raksa-dana-models", filename=model_path.name, local_dir=MODEL_DIR)
-   ```
-
-5. Push kode ke Space repository:
-   ```bash
-   git remote add space https://huggingface.co/spaces/username/raksa-dana
-   git push space main
-   ```
-
-**Alternatif:** Railway atau Render untuk FastAPI backend saja.
-
----
-
 ## Experiment Tracking
 
 MLflow digunakan untuk tracking hyperparameter dan metrik. Jalankan UI lokal:
