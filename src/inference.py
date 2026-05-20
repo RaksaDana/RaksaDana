@@ -185,7 +185,7 @@ def forecast_30d(ticker: str, days: int = 30) -> list:
 
         close_history.append(current_close)
         prices  = pd.Series(close_history)
-        returns = np.log(prices / prices.shift(1)).dropna()
+        returns = pd.Series(np.log(prices / prices.shift(1))).dropna()
 
         new_row = raw_window[-1].copy()
         updates = {
