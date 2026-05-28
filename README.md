@@ -119,6 +119,8 @@ RaksaDana/
 
 ## Cara Menjalankan
 
+Gunakan Python 3.10 sampai 3.12 agar dependency TensorFlow kompatibel.
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -150,6 +152,36 @@ forecast = forecast_30d("BBCA.JK", days=30)
 metrics = get_metrics("BBCA.JK")
 # → {"mape": 1.18, "r2": 0.9615, "direction_accuracy": 48.9, ...}
 ```
+
+## Kalkulator Profit/Loss
+
+```python
+from src.inference import calculate_profit_loss_from_prices
+
+# Mode manual: user menentukan harga beli dan harga target/jual
+result = calculate_profit_loss_from_prices(
+    ticker="BBCA.JK",
+    buy_price=7600,
+    sell_price=7800,
+    lots=2,
+)
+```
+
+Jika ingin memakai target harga dari model, gunakan wrapper `calculate_profit_loss`:
+
+```python
+from src.inference import calculate_profit_loss
+
+# Mode model: jika sell_price tidak diisi, target exit memakai prediksi model
+projection = calculate_profit_loss(
+    ticker="BBCA.JK",
+    buy_price=7600,
+    lots=2,
+    forecast_days=30,
+)
+```
+
+Output utama: `net_profit_loss`, `net_return_pct`, `breakeven_sell_price`, `status`, dan rincian biaya transaksi. Default fee menggunakan asumsi `buy_fee_rate=0.0015` dan `sell_fee_rate=0.0025`; ubah sesuai broker yang dipakai.
 
 ---
 
