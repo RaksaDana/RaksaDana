@@ -1,5 +1,7 @@
+import os
 import streamlit as st
 from src.inference import predict_next_day, forecast_30d, get_metrics
+from src.gemini_narration import generate_prediction_narration
 
 st.set_page_config(
     page_title="RaksaDana",
@@ -112,3 +114,17 @@ if st.button("Hitung Profit/Loss"):
     st.write(f"**Net Profit/Loss:** Rp {calc['net_profit_loss']:,.2f}")
     st.write(f"**Return:** {calc['net_return_pct']:.2f}%")
     st.write(f"**Breakeven Price:** Rp {calc['breakeven_sell_price']:,.2f}")
+
+st.subheader("🤖 Analisis AI (Gemini)")
+
+gemini_key = os.getenv("GEMINI_API_KEY", "")
+if not gemini_key:
+    st.info("Set environment variable `GEMINI_API_KEY` untuk mengaktifkan narasi AI.")
+else:
+    if st.button("Generate Narasi AI"):
+        with st.spinner("Membuat narasi investasi..."):
+            try:
+                narration = generate_prediction_narration(ticker, result, metrics)
+                st.markdown(narration)
+            except Exception as e:
+                st.error(f"Gagal membuat narasi: {e}")
