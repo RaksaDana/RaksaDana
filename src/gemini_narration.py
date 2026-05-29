@@ -51,7 +51,7 @@ def generate_prediction_narration(ticker: str, prediction: dict, metrics: dict) 
         "Buat narasi investasi singkat dalam bahasa Indonesia."
     )
     response = _get_client().models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemma-4-31b-it",
         contents=prompt,
         config=types.GenerateContentConfig(
             system_instruction=_PREDICTION_SYSTEM,
@@ -82,7 +82,7 @@ def generate_profit_loss_narration(
         "Buat narasi kalkulasi profit/loss dalam bahasa Indonesia."
     )
     response = _get_client().models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemma-4-31b-it",
         contents=prompt,
         config=types.GenerateContentConfig(
             system_instruction=_PROFIT_LOSS_SYSTEM,
