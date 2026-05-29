@@ -99,3 +99,35 @@ def health():
 @app.get("/api/v1/tickers")
 def tickers():
     return inference.SUPPORTED_TICKERS
+
+
+@app.get("/api/v1/predict/{ticker}", response_model=PredictionResponse)
+async def predict(ticker: str, narrate: bool = Query(False)):
+    try:
+        result = await asyncio.to_thread(inference.predict_next_day, ticker)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    if narrate:
+        try:
+            metrics_data = await asyncio.to_thread(inference.get_metrics, ticker)
+            result["narration"] = await asyncio.to_thread(
+                gemini_narration.generate_prediction_narration,
+                ticker,
+                result.copy(),
+                metrics_data,
+            )
+        except Exception as e:
+            result["narration"] = f"Narasi tidak tersedia: {e}"
+
+    return result
+
+
+@app.get("/api/v1/metrics/{ticker}", response_model=MetricsResponse)
+async def metrics(ticker: str):
+    result = await asyncio.to_thread(inference.get_metrics, ticker)
+    if not result:
+        raise HTTPException(status_code=404, detail=f"No metrics found for {ticker}")
+    return result
