@@ -141,3 +141,40 @@ async def forecast(ticker: str, days: int = Query(30, ge=1, le=90)):
         raise HTTPException(status_code=422, detail=str(e))
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
+
+
+@app.post("/api/v1/profit-loss", response_model=ProfitLossResponse)
+async def profit_loss(body: ProfitLossRequest, narrate: bool = Query(False)):
+    try:
+        result = await asyncio.to_thread(
+            inference.calculate_profit_loss,
+            ticker=body.ticker,
+            buy_price=body.buy_price,
+            lots=body.lots,
+            shares=body.shares,
+            sell_price=body.sell_price,
+            forecast_days=body.forecast_days,
+            buy_fee_rate=body.buy_fee_rate,
+            sell_fee_rate=body.sell_fee_rate,
+            lot_size=body.lot_size,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    if narrate:
+        try:
+            prediction = await asyncio.to_thread(inference.predict_next_day, body.ticker)
+            metrics_data = await asyncio.to_thread(inference.get_metrics, body.ticker)
+            result["narration"] = await asyncio.to_thread(
+                gemini_narration.generate_profit_loss_narration,
+                body.ticker,
+                prediction,
+                metrics_data,
+                result.copy(),
+            )
+        except Exception as e:
+            result["narration"] = f"Narasi tidak tersedia: {e}"
+
+    return result
