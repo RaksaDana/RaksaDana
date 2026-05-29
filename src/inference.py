@@ -32,6 +32,8 @@ DEFAULT_LOT_SIZE = 100
 BUY_THRESHOLD  =  0.005   # predicted return > +0.5% → BUY
 SELL_THRESHOLD = -0.005   # predicted return < -0.5% → SELL
 
+_ARTIFACT_CACHE: dict = {}
+
 
 # helpers
 
@@ -79,6 +81,8 @@ def _load_keras_model(tf, path: Path):
 
 def _load_artifacts(ticker: str):
     """Load ensemble, scalers, and feature config for one ticker."""
+    if ticker in _ARTIFACT_CACHE:
+        return _ARTIFACT_CACHE[ticker]
     import tensorflow as tf
 
     safe = _safe(ticker)
@@ -111,7 +115,9 @@ def _load_artifacts(ticker: str):
     if not ensemble:
         raise FileNotFoundError(f"No model found for {ticker}. Run notebook 03/04/05 first.")
 
-    return ensemble, feature_scaler, target_scaler, feature_cols, window_size
+    result = (ensemble, feature_scaler, target_scaler, feature_cols, window_size)
+    _ARTIFACT_CACHE[ticker] = result
+    return result
 
 
 def _build_window(ticker: str, feature_cols: list, feature_scaler, window_size: int):
@@ -194,6 +200,12 @@ def _resolve_share_count(lots=None, shares=None, lot_size: int = DEFAULT_LOT_SIZ
 
 def get_available_tickers() -> list:
     return SUPPORTED_TICKERS
+
+
+def preload_all() -> None:
+    """Warm the artifact cache for all supported tickers."""
+    for ticker in SUPPORTED_TICKERS:
+        _load_artifacts(ticker)
 
 
 def predict_next_day(ticker: str) -> dict:
