@@ -56,7 +56,7 @@ def generate_prediction_narration(ticker: str, prediction: dict, metrics: dict) 
         config=types.GenerateContentConfig(
             system_instruction=_PREDICTION_SYSTEM,
             temperature=1.0,
-            max_output_tokens=2048,
+            max_output_tokens=8192,
         ),
     )
     return response.text
@@ -87,7 +87,7 @@ def generate_profit_loss_narration(
         config=types.GenerateContentConfig(
             system_instruction=_PROFIT_LOSS_SYSTEM,
             temperature=1.0,
-            max_output_tokens=2048,
+            max_output_tokens=8192,
         ),
     )
     return response.text
