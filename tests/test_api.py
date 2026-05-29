@@ -106,3 +106,31 @@ def test_metrics_not_found_returns_404(monkeypatch):
     with TestClient(main.app) as c:
         r = c.get("/api/v1/metrics/BBCA.JK")
     assert r.status_code == 404
+
+
+def test_forecast_returns_30_points_by_default(client):
+    r = client.get("/api/v1/forecast/BBCA.JK")
+    assert r.status_code == 200
+    body = r.json()
+    assert isinstance(body, list)
+    assert len(body) == 30
+    first = body[0]
+    assert "date" in first
+    assert "predicted_close" in first
+    assert "predicted_log_return" in first
+
+
+def test_forecast_custom_days(client):
+    r = client.get("/api/v1/forecast/BBCA.JK?days=7")
+    assert r.status_code == 200
+    assert len(r.json()) == 7
+
+
+def test_forecast_days_below_minimum_returns_422(client):
+    r = client.get("/api/v1/forecast/BBCA.JK?days=0")
+    assert r.status_code == 422
+
+
+def test_forecast_days_above_maximum_returns_422(client):
+    r = client.get("/api/v1/forecast/BBCA.JK?days=91")
+    assert r.status_code == 422

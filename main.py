@@ -131,3 +131,13 @@ async def metrics(ticker: str):
     if not result:
         raise HTTPException(status_code=404, detail=f"No metrics found for {ticker}")
     return result
+
+
+@app.get("/api/v1/forecast/{ticker}", response_model=list[ForecastPoint])
+async def forecast(ticker: str, days: int = Query(30, ge=1, le=90)):
+    try:
+        return await asyncio.to_thread(inference.forecast_30d, ticker, days)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=503, detail=str(e))
