@@ -1,0 +1,72 @@
+import pytest
+from unittest.mock import MagicMock
+
+
+_PREDICTION = {
+    "signal_date": "2026-05-30",
+    "base_close": 9500.0,
+    "predicted_log_return": 0.010417,
+    "predicted_close": 9600.0,
+    "signal": "BUY",
+}
+_METRICS = {
+    "mape": 1.2,
+    "r2": 0.85,
+    "direction_accuracy": 71.0,
+    "return_rmse": 0.005,
+}
+_PROFIT_LOSS = {
+    "buy_price": 7600.0,
+    "sell_price": 9600.0,
+    "quantity": {"shares": 200, "lots": 2.0},
+    "total_cost": 1522280.0,
+    "net_profit_loss": 392920.0,
+    "net_return_pct": 25.813,
+    "status": "PROFIT",
+    "breakeven_sell_price": 7630.48,
+}
+
+
+def test_get_client_raises_without_api_key(monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    import src.gemini_narration as gn
+    gn._client = None
+    with pytest.raises(RuntimeError, match="GEMINI_API_KEY not set"):
+        gn._get_client()
+
+
+def test_generate_prediction_narration_returns_model_text(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    import src.gemini_narration as gn
+
+    mock_resp = MagicMock()
+    mock_resp.text = "Narasi prediksi BBCA"
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = mock_resp
+    gn._client = mock_client
+
+    result = gn.generate_prediction_narration("BBCA.JK", _PREDICTION, _METRICS)
+
+    assert result == "Narasi prediksi BBCA"
+    call_kwargs = mock_client.models.generate_content.call_args.kwargs
+    assert call_kwargs["model"] == "gemini-2.0-flash"
+    assert "BBCA.JK" in call_kwargs["contents"]
+    assert "BUY" in call_kwargs["contents"]
+
+
+def test_generate_profit_loss_narration_returns_model_text(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    import src.gemini_narration as gn
+
+    mock_resp = MagicMock()
+    mock_resp.text = "Narasi profit loss BBCA"
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = mock_resp
+    gn._client = mock_client
+
+    result = gn.generate_profit_loss_narration("BBCA.JK", _PREDICTION, _METRICS, _PROFIT_LOSS)
+
+    assert result == "Narasi profit loss BBCA"
+    call_kwargs = mock_client.models.generate_content.call_args.kwargs
+    assert "PROFIT" in call_kwargs["contents"]
+    assert "7600" in call_kwargs["contents"]
