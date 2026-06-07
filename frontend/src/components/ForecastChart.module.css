@@ -1,0 +1,88 @@
+/* ForecastChart.module.css */
+.wrapper {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--sp-6);
+}
+
+/* Clean header: title anchored left, legend anchored right */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-6);
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.2px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.legendLine {
+  width: 20px;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: 1px;
+}
+
+.legendDashed {
+  width: 20px;
+  height: 0;
+  border-top: 2px dashed var(--color-text-muted);
+}
+
+.chartArea {
+  width: 100%;
+  height: 280px;
+}
+
+/* Footnote below the chart */
+.chartNote {
+  margin-top: var(--sp-3);
+  font-size: var(--text-xs);
+  color: #9CA3AF;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Custom tooltip */
+.tooltip {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-2) var(--sp-3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.tooltipDate {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+
+.tooltipPrice {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-accent);
+}

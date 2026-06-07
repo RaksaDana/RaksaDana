@@ -1,0 +1,21 @@
+/* App.module.css */
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: var(--sp-8);
+  min-width: 0; /* prevent flex blowout */
+}
+
+/* On mobile: no sidebar offset, add bottom padding for bottom nav */
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+    padding: var(--sp-4);
+    padding-bottom: calc(60px + var(--sp-4));
+  }
+}
