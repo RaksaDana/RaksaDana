@@ -39,45 +39,38 @@
       <!-- Left Column (Signal & Metrics & Forecast) -->
       <div class="lg:col-span-2 space-y-6 stagger-item opacity-0">
         <!-- Signal Hero Card -->
-        <div v-if="predictionLoading && !isSwitching">
-          <SkeletonLoader customClass="h-48 w-full" />
-        </div>
         <SignalCard 
-          v-else-if="predictionData" 
           :prediction="predictionData" 
+          :loading="predictionLoading && !isSwitching"
+          :error="predictionError && !isSwitching"
+          @retry="loadTickerData(activeTicker)"
         />
-        <div v-else-if="predictionError && !isSwitching" class="glass-card h-48 rounded-2xl flex items-center justify-center">
-          <span class="text-danger">{{ predictionError }}</span>
-        </div>
 
         <!-- Metrics Grid -->
-        <div v-if="metricsLoading && !isSwitching">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <SkeletonLoader v-for="i in 4" :key="i" customClass="h-[120px] w-full" />
-          </div>
-        </div>
         <MetricsGrid 
-          v-else-if="metricsData" 
           :metrics="metricsData" 
+          :loading="metricsLoading && !isSwitching"
+          :error="metricsError && !isSwitching"
+          @retry="loadTickerData(activeTicker)"
         />
 
         <!-- Forecast Chart -->
-        <div v-if="forecastLoading && !isSwitching">
-          <SkeletonLoader customClass="h-[380px] w-full" />
-        </div>
         <ForecastChart 
-          v-else-if="forecastData && predictionData" 
           :forecastData="forecastData"
-          :baseClose="predictionData.base_close"
+          :baseClose="predictionData?.base_close || 0"
+          :loading="forecastLoading && !isSwitching"
+          :error="forecastError && !isSwitching"
+          @retry="loadTickerData(activeTicker)"
         />
       </div>
 
       <!-- Right Column (Narration) -->
       <div class="lg:col-span-1 stagger-item opacity-0">
         <NarrationCard 
-          :loading="predictionLoading && !isSwitching"
-          :error="predictionError"
-          :narration="predictionData?.narration"
+          :loading="narrationLoading"
+          :error="narrationError"
+          :narration="narrationResult"
+          @request="fetchNarration"
         />
       </div>
     </div>
@@ -93,7 +86,7 @@ import ForecastChart from '~/components/ForecastChart.vue';
 import NarrationCard from '~/components/NarrationCard.vue';
 import gsap from 'gsap';
 
-const { getTickers, getPrediction, getForecast, getMetrics } = useApi();
+const { getTickers, getPrediction, getPredictionWithNarration, getForecast, getMetrics } = useApi();
 
 const { data: tickers, loading: tickersLoading, error: tickersError, fetch: fetchTickers } = getTickers();
 
@@ -113,9 +106,15 @@ const predictionError = ref(null);
 
 const forecastData = ref(null);
 const forecastLoading = ref(false);
+const forecastError = ref(null);
 
 const metricsData = ref(null);
 const metricsLoading = ref(false);
+const metricsError = ref(null);
+
+const narrationResult = ref('');
+const narrationLoading = ref(false);
+const narrationError = ref(false);
 
 const animateEntrance = () => {
   gsap.to(titleRef.value, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.1 });
@@ -170,6 +169,13 @@ const loadTickerData = async (ticker) => {
   predictionLoading.value = true;
   forecastLoading.value = true;
   metricsLoading.value = true;
+  
+  // Reset previous data explicitly on switch
+  predictionData.value = null;
+  forecastData.value = null;
+  metricsData.value = null;
+  narrationResult.value = '';
+  narrationError.value = false;
 
   const [predRes, foreRes, metRes] = await Promise.allSettled([
     predEndpoint.fetch(),
@@ -185,12 +191,30 @@ const loadTickerData = async (ticker) => {
 
   if (foreRes.status === 'fulfilled') {
     forecastData.value = forecastEndpoint.data.value;
+    forecastError.value = forecastEndpoint.error.value;
   }
   forecastLoading.value = false;
 
   if (metRes.status === 'fulfilled') {
     metricsData.value = metricsEndpoint.data.value;
+    metricsError.value = metricsEndpoint.error.value;
   }
   metricsLoading.value = false;
+};
+
+const fetchNarration = async () => {
+  narrationLoading.value = true;
+  narrationError.value = false;
+  
+  // The API will regenerate prediction & narration together
+  const narrateEndpoint = getPredictionWithNarration(activeTicker.value);
+  
+  await narrateEndpoint.fetch();
+  if (narrateEndpoint.data.value?.narration) {
+    narrationResult.value = narrateEndpoint.data.value.narration;
+  } else {
+    narrationError.value = true;
+  }
+  narrationLoading.value = false;
 };
 </script>

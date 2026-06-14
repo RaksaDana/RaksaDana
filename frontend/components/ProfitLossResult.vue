@@ -1,14 +1,18 @@
 <template>
   <div class="glass-card rounded-2xl overflow-hidden flex flex-col h-full" ref="resultCardRef">
     <div v-if="loading" class="p-6 space-y-4">
-      <SkeletonLoader customClass="h-16 w-full" />
+      <SkeletonBlock width="100%" height="64px" borderRadius="12px" />
       <div class="grid grid-cols-2 gap-4">
-        <SkeletonLoader v-for="i in 6" :key="i" customClass="h-20 w-full" />
+        <SkeletonBlock v-for="i in 6" :key="i" width="100%" height="80px" borderRadius="8px" />
       </div>
     </div>
     
-    <div v-else-if="error" class="p-6 text-center text-danger text-[14px]">
-      {{ error }}
+    <div v-else-if="error" class="bg-danger/10 border-l-[3px] border-danger rounded-r-xl p-6 flex flex-col gap-3 m-6">
+      <div class="flex items-start gap-2">
+        <ExclamationTriangleIcon class="w-5 h-5 text-danger shrink-0 mt-0.5" />
+        <span class="text-[14px] text-danger font-medium">Gagal menghitung simulasi. Pastikan input valid.</span>
+      </div>
+      <button @click="$emit('retry')" class="text-[12px] font-semibold text-danger underline w-fit hover:opacity-80">Coba Lagi</button>
     </div>
     
     <div v-else-if="result" class="flex flex-col h-full">
@@ -88,9 +92,15 @@
           </div>
         </details>
         
-        <div class="h-px w-full bg-light-border dark:bg-dark-border my-2" v-if="result.narration"></div>
+        <div class="h-px w-full bg-light-border dark:bg-dark-border my-2"></div>
 
-        <NarrationCard v-if="result.narration" :narration="result.narration" :loading="false" />
+        <NarrationCard 
+          :narration="narrationResult" 
+          :loading="narrationLoading"
+          :error="narrationError"
+          buttonText="Analisis hasil kalkulasi dengan AI"
+          @request="$emit('request-narration')"
+        />
       </div>
     </div>
     
@@ -103,24 +113,21 @@
 <script setup>
 import { computed, ref, watch, onMounted } from 'vue';
 import { formatCurrency } from '~/utils/formatters';
-import SkeletonLoader from './SkeletonLoader.vue';
+import SkeletonBlock from './SkeletonBlock.vue';
 import NarrationCard from './NarrationCard.vue';
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
 import gsap from 'gsap';
 
 const props = defineProps({
-  result: {
-    type: Object,
-    default: null
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  },
-  error: {
-    type: String,
-    default: ''
-  }
+  result: { type: Object, default: null },
+  loading: { type: Boolean, default: false },
+  error: { type: [Boolean, String], default: false },
+  narrationResult: { type: String, default: '' },
+  narrationLoading: { type: Boolean, default: false },
+  narrationError: { type: [Boolean, String], default: false }
 });
+
+defineEmits(['retry', 'request-narration']);
 
 const resultCardRef = ref(null);
 const displayNetProfit = ref(0);

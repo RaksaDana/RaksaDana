@@ -1,24 +1,43 @@
 <template>
-  <div class="glass-card rounded-2xl p-6">
+  <div class="glass-card rounded-2xl p-6 h-[400px] flex flex-col">
     <div class="mb-4">
       <h3 class="text-[16px] font-semibold text-light-text dark:text-dark-text">Proyeksi Harga 30 Hari</h3>
     </div>
     
-    <div class="h-[300px] w-full">
-      <ClientOnly>
-        <apexchart 
-          type="area" 
-          height="300" 
-          :options="chartOptions" 
-          :series="series" 
-        />
-      </ClientOnly>
+    <!-- Loading State -->
+    <div v-if="loading" class="flex-1 w-full flex flex-col justify-end gap-2 pb-6">
+      <SkeletonBlock width="100%" height="280px" borderRadius="8px" />
     </div>
 
-    <div class="mt-4 text-center">
-      <p class="text-[11px] text-light-muted dark:text-dark-muted italic">
-        Data model per 20 Januari 2026. Proyeksi dihitung mulai tanggal tersebut.
-      </p>
+    <!-- Error State -->
+    <div v-else-if="error" class="flex-1 w-full flex flex-col justify-center gap-4">
+      <div class="bg-danger/10 border-l-[3px] border-danger rounded-xl p-6 flex items-start gap-3">
+        <ExclamationTriangleIcon class="w-6 h-6 text-danger shrink-0 mt-0.5" />
+        <div class="flex flex-col gap-2">
+          <span class="text-[16px] text-danger font-medium">Gagal memuat chart proyeksi harga.</span>
+          <button @click="$emit('retry')" class="text-[14px] font-semibold text-danger underline w-fit hover:opacity-80">Coba Lagi</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Ready State -->
+    <div v-else-if="forecastData && forecastData.length > 0" class="flex-1 w-full relative">
+      <div class="h-[280px] w-full">
+        <ClientOnly>
+          <apexchart 
+            type="area" 
+            height="280" 
+            :options="chartOptions" 
+            :series="series" 
+          />
+        </ClientOnly>
+      </div>
+
+      <div class="mt-4 text-center">
+        <p class="text-[11px] text-light-muted dark:text-dark-muted italic">
+          Data model per 20 Januari 2026. Proyeksi dihitung mulai tanggal tersebut.
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -26,27 +45,42 @@
 <script setup>
 import { computed } from 'vue';
 import { useColorMode } from '@vueuse/core';
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
+import SkeletonBlock from './SkeletonBlock.vue';
 
 const colorMode = useColorMode();
 
 const props = defineProps({
   forecastData: {
     type: Array,
-    required: true
+    default: () => []
   },
   baseClose: {
     type: Number,
-    required: true
+    default: 0
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  error: {
+    type: [Boolean, String],
+    default: false
   }
 });
 
-const series = computed(() => [{
-  name: 'Prediksi Harga',
-  data: props.forecastData.map(d => ({
-    x: new Date(d.date).getTime(),
-    y: d.predicted_close
-  }))
-}]);
+defineEmits(['retry']);
+
+const series = computed(() => {
+  if (!props.forecastData || props.forecastData.length === 0) return [];
+  return [{
+    name: 'Prediksi Harga',
+    data: props.forecastData.map(d => ({
+      x: new Date(d.date).getTime(),
+      y: d.predicted_close
+    }))
+  }];
+});
 
 const chartOptions = computed(() => {
   const isDark = colorMode.value === 'dark';
@@ -113,7 +147,7 @@ const chartOptions = computed(() => {
       }
     },
     annotations: {
-      yaxis: [{
+      yaxis: props.baseClose > 0 ? [{
         y: props.baseClose,
         borderColor: '#F59E0B',
         strokeDashArray: 5,
@@ -125,7 +159,7 @@ const chartOptions = computed(() => {
           },
           text: 'Harga Saat Ini'
         }
-      }]
+      }] : []
     }
   };
 });

@@ -54,16 +54,20 @@ export const useApi = () => {
   };
 
   const getTickers = createEndpoint(() => () => apiClient.get('/api/v1/tickers'));
-  const getPrediction = createEndpoint((ticker) => () => apiClient.get(`/api/v1/predict/${ticker}?narrate=true`));
+  const getPrediction = createEndpoint((ticker) => () => apiClient.get(`/api/v1/predict/${ticker}`));
+  const getPredictionWithNarration = createEndpoint((ticker) => () => apiClient.get(`/api/v1/predict/${ticker}?narrate=true`));
   const getForecast = createEndpoint((ticker, days = 30) => () => apiClient.get(`/api/v1/forecast/${ticker}?days=${days}`));
   const getMetrics = createEndpoint((ticker) => () => apiClient.get(`/api/v1/metrics/${ticker}`));
-  const calculateProfitLoss = createEndpoint((payload) => () => apiClient.post('/api/v1/profit-loss?narrate=true', payload));
+  const calculateProfitLoss = createEndpoint((payload) => () => apiClient.post('/api/v1/profit-loss', payload));
+  const calculateProfitLossWithNarration = createEndpoint((payload) => () => apiClient.post('/api/v1/profit-loss?narrate=true', payload));
 
   return {
     getTickers,
     getPrediction,
+    getPredictionWithNarration,
     getForecast,
     getMetrics,
-    calculateProfitLoss
+    calculateProfitLoss,
+    calculateProfitLossWithNarration
   };
 };

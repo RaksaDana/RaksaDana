@@ -119,6 +119,11 @@
           :result="resultData" 
           :loading="calculating" 
           :error="calcError" 
+          :narrationResult="narrationResult"
+          :narrationLoading="narrationLoading"
+          :narrationError="narrationError"
+          @retry="submitForm"
+          @request-narration="fetchNarration"
         />
       </div>
     </div>
@@ -132,9 +137,10 @@ import { useApi } from '~/composables/useApi';
 import ProfitLossResult from '~/components/ProfitLossResult.vue';
 import gsap from 'gsap';
 
-const { getTickers, calculateProfitLoss } = useApi();
+const { getTickers, calculateProfitLoss, calculateProfitLossWithNarration } = useApi();
 
 const calcEndpoint = calculateProfitLoss();
+const narrateEndpoint = calculateProfitLossWithNarration();
 
 const titleRef = ref(null);
 const contentRef = ref(null);
@@ -153,14 +159,16 @@ const resultData = ref(null);
 const calculating = ref(false);
 const calcError = ref('');
 
-// Using a custom fetch for tickers to support setup lifecycle
+const narrationResult = ref('');
+const narrationLoading = ref(false);
+const narrationError = ref(false);
+
 const tickers = ref([]);
 const tickersLoading = ref(true);
 
 onMounted(async () => {
   gsap.set(titleRef.value, { y: 20 });
   
-  // Fetch tickers inline to easily grab data and setup form
   try {
      const tEndpoint = getTickers();
      await tEndpoint.fetch();
@@ -172,7 +180,6 @@ onMounted(async () => {
      tickersLoading.value = false;
   }
   
-  // Staggered entrance
   gsap.to(titleRef.value, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.1 });
   if (contentRef.value) {
     const items = contentRef.value.querySelectorAll('.stagger-item');
@@ -191,10 +198,7 @@ watch(usePrediction, (newVal) => {
   }
 });
 
-const submitForm = async () => {
-  calculating.value = true;
-  calcError.value = '';
-  
+const getPayload = () => {
   const payload = {
     ticker: form.value.ticker,
     buy_price: parseFloat(form.value.buy_price),
@@ -203,14 +207,42 @@ const submitForm = async () => {
   
   if (usePrediction.value) {
     payload.forecast_days = parseInt(form.value.forecast_days);
+    payload.sell_price = null;
   } else {
     payload.sell_price = parseFloat(form.value.sell_price);
   }
+  
+  return payload;
+};
+
+const submitForm = async () => {
+  calculating.value = true;
+  calcError.value = '';
+  narrationResult.value = '';
+  narrationError.value = false;
+  
+  const payload = getPayload();
   
   calcEndpoint.fetch(payload).then(() => {
     resultData.value = calcEndpoint.data.value;
     calcError.value = calcEndpoint.error.value;
     calculating.value = false;
+  });
+};
+
+const fetchNarration = async () => {
+  narrationLoading.value = true;
+  narrationError.value = false;
+  
+  const payload = getPayload();
+  
+  narrateEndpoint.fetch(payload).then(() => {
+    if (narrateEndpoint.data.value?.narration) {
+      narrationResult.value = narrateEndpoint.data.value.narration;
+    } else {
+      narrationError.value = true;
+    }
+    narrationLoading.value = false;
   });
 };
 </script>
