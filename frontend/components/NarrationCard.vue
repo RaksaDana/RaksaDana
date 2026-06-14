@@ -23,7 +23,7 @@
     <div v-else-if="error" class="bg-danger/10 border-l-[3px] border-danger rounded-r-xl p-4 flex flex-col gap-3">
       <div class="flex items-start gap-2">
         <ExclamationTriangleIcon class="w-5 h-5 text-danger shrink-0 mt-0.5" />
-        <span class="text-[14px] text-danger font-medium">Analisis AI tidak tersedia saat ini. Coba beberapa saat lagi.</span>
+        <span class="text-[14px] text-danger font-medium">{{ typeof error === 'string' ? error : 'Analisis AI tidak tersedia saat ini. Coba beberapa saat lagi.' }}</span>
       </div>
       <button @click="$emit('request')" class="text-[12px] font-semibold text-danger underline w-fit hover:opacity-80">Coba Lagi</button>
     </div>

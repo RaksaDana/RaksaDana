@@ -7,10 +7,18 @@
       </div>
     </div>
     
+    <div v-else-if="isEmpty" class="flex-1 flex flex-col items-center justify-center p-8 min-h-[300px]">
+      <CalculatorIcon class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
+      <h3 class="text-[18px] font-semibold text-gray-500 dark:text-gray-400 mb-2">Mulai Simulasi Investasi</h3>
+      <p class="text-[14px] text-gray-400 dark:text-gray-500 text-center max-w-[280px] leading-[1.6]">
+        Isi form di sebelah kiri dan klik Hitung Simulasi untuk melihat estimasi profit atau loss investasi Anda.
+      </p>
+    </div>
+    
     <div v-else-if="error" class="bg-danger/10 border-l-[3px] border-danger rounded-r-xl p-6 flex flex-col gap-3 m-6">
       <div class="flex items-start gap-2">
         <ExclamationTriangleIcon class="w-5 h-5 text-danger shrink-0 mt-0.5" />
-        <span class="text-[14px] text-danger font-medium">Gagal menghitung simulasi. Pastikan input valid.</span>
+        <span class="text-[14px] text-danger font-medium">{{ typeof error === 'string' ? error : 'Gagal menghitung simulasi. Pastikan input valid.' }}</span>
       </div>
       <button @click="$emit('retry')" class="text-[12px] font-semibold text-danger underline w-fit hover:opacity-80">Coba Lagi</button>
     </div>
@@ -103,10 +111,6 @@
         />
       </div>
     </div>
-    
-    <div v-else class="p-6 h-full flex items-center justify-center text-light-muted dark:text-dark-muted text-[14px]">
-      Isi form di sebelah kiri untuk melihat hasil simulasi.
-    </div>
   </div>
 </template>
 
@@ -115,7 +119,7 @@ import { computed, ref, watch, onMounted } from 'vue';
 import { formatCurrency } from '~/utils/formatters';
 import SkeletonBlock from './SkeletonBlock.vue';
 import NarrationCard from './NarrationCard.vue';
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
+import { ExclamationTriangleIcon, CalculatorIcon } from '@heroicons/vue/24/outline';
 import gsap from 'gsap';
 
 const props = defineProps({
@@ -126,6 +130,8 @@ const props = defineProps({
   narrationLoading: { type: Boolean, default: false },
   narrationError: { type: [Boolean, String], default: false }
 });
+
+const isEmpty = computed(() => !props.result && !props.error && !props.loading);
 
 defineEmits(['retry', 'request-narration']);
 

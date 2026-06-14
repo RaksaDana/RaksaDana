@@ -19,7 +19,7 @@
     <div v-else-if="error" class="relative bg-danger/10 border-l-[3px] border-danger rounded-xl p-6 h-[192px] flex flex-col justify-center gap-4 m-0.5">
       <div class="flex items-start gap-2">
         <ExclamationTriangleIcon class="w-6 h-6 text-danger shrink-0 mt-0.5" />
-        <span class="text-[16px] text-danger font-medium">Gagal memuat sinyal prediksi.</span>
+        <span class="text-[16px] text-danger font-medium">{{ typeof error === 'string' ? error : 'Gagal memuat sinyal prediksi.' }}</span>
       </div>
       <button @click="$emit('retry')" class="text-[14px] font-semibold text-danger underline w-fit hover:opacity-80">Coba Lagi</button>
     </div>

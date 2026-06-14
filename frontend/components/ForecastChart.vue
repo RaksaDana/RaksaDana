@@ -14,7 +14,7 @@
       <div class="bg-danger/10 border-l-[3px] border-danger rounded-xl p-6 flex items-start gap-3">
         <ExclamationTriangleIcon class="w-6 h-6 text-danger shrink-0 mt-0.5" />
         <div class="flex flex-col gap-2">
-          <span class="text-[16px] text-danger font-medium">Gagal memuat chart proyeksi harga.</span>
+          <span class="text-[16px] text-danger font-medium">{{ typeof error === 'string' ? error : 'Gagal memuat chart proyeksi harga.' }}</span>
           <button @click="$emit('retry')" class="text-[14px] font-semibold text-danger underline w-fit hover:opacity-80">Coba Lagi</button>
         </div>
       </div>

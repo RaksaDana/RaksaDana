@@ -41,7 +41,14 @@ export const useApi = () => {
           const response = await withRetry(() => requestFnBuilder(...args)());
           data.value = response.data;
         } catch (err) {
-          error.value = err.response?.data?.message || err.message || 'Terjadi kesalahan pada server.';
+          const detail = err.response?.data?.detail;
+          if (Array.isArray(detail)) {
+            error.value = detail.map(d => d.msg).join(', ');
+          } else if (typeof detail === 'string') {
+            error.value = detail;
+          } else {
+            error.value = err.response?.data?.message || err.message || 'Terjadi kesalahan pada server.';
+          }
           console.error('API Error:', err);
         } finally {
           loading.value = false;

@@ -30,7 +30,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <!-- Buy Price -->
             <div class="relative group">
-              <input type="number" id="buy_price" v-model="form.buy_price" required min="1" step="1"
+              <input type="number" id="buy_price" :value="form.buy_price" @input="form.buy_price = $event.target.value" required min="1" step="any"
                 class="peer w-full h-14 px-4 pt-4 rounded-xl bg-light-bg dark:bg-dark-bg border border-light-border dark:border-dark-border text-light-text dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder=" "
               />
@@ -39,7 +39,7 @@
 
             <!-- Lots -->
             <div class="relative group">
-              <input type="number" id="lots" v-model="form.lots" required min="1" step="1"
+              <input type="number" id="lots" :value="form.lots" @input="form.lots = $event.target.value" required min="1" step="1"
                 class="peer w-full h-14 px-4 pt-4 rounded-xl bg-light-bg dark:bg-dark-bg border border-light-border dark:border-dark-border text-light-text dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder=" "
               />
@@ -89,7 +89,7 @@
             
             <div v-else class="pt-2">
               <div class="relative group">
-                <input type="number" id="sell_price" v-model="form.sell_price" required min="1" step="1"
+                <input type="number" id="sell_price" :value="form.sell_price" @input="form.sell_price = $event.target.value" required min="1" step="any"
                   class="peer w-full h-14 px-4 pt-4 rounded-xl bg-light-bg dark:bg-dark-bg border border-light-border dark:border-dark-border text-light-text dark:text-dark-text focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                   placeholder=" "
                 />
@@ -118,7 +118,7 @@
         <ProfitLossResult 
           :result="resultData" 
           :loading="calculating" 
-          :error="calcError" 
+          :error="hasSubmitted && calcError ? calcError : false" 
           :narrationResult="narrationResult"
           :narrationLoading="narrationLoading"
           :narrationError="narrationError"
@@ -149,11 +149,13 @@ const usePrediction = ref(true);
 
 const form = ref({
   ticker: '',
-  buy_price: null,
-  lots: null,
-  sell_price: null,
+  buy_price: '',
+  lots: '',
+  sell_price: '',
   forecast_days: 30
 });
+
+const hasSubmitted = ref(false);
 
 const resultData = ref(null);
 const calculating = ref(false);
@@ -201,52 +203,68 @@ watch(usePrediction, (newVal) => {
 const getPayload = () => {
   const payload = {
     ticker: form.value.ticker,
-    buy_price: parseFloat(form.value.buy_price),
-    lots: parseInt(form.value.lots)
+    buy_price: parseFloat(form.value.buy_price) || 0,
+    lots: parseInt(form.value.lots) || 1,
+    buy_fee_rate: 0.0015,
+    sell_fee_rate: 0.0025,
+    lot_size: 100
   };
   
   if (usePrediction.value) {
-    payload.forecast_days = parseInt(form.value.forecast_days);
+    payload.forecast_days = parseInt(form.value.forecast_days) || 30;
     payload.sell_price = null;
   } else {
-    payload.sell_price = parseFloat(form.value.sell_price);
+    payload.sell_price = parseFloat(form.value.sell_price) || null;
   }
   
   return payload;
 };
 
 const submitForm = async () => {
-  // Validasi input
+  hasSubmitted.value = true;
+  // Reset errors first
+  calcError.value = '';
+
+  // Validate
   if (!form.value.ticker) {
     calcError.value = 'Pilih saham terlebih dahulu.';
     return;
   }
-  if (!form.value.buy_price || form.value.buy_price <= 0) {
+  if (!form.value.buy_price || parseFloat(form.value.buy_price) <= 0) {
     calcError.value = 'Masukkan harga beli yang valid.';
     return;
   }
-  if (!form.value.lots || form.value.lots <= 0) {
+  if (!form.value.lots || parseInt(form.value.lots) <= 0) {
     calcError.value = 'Masukkan jumlah lot yang valid.';
     return;
   }
-  if (!usePrediction.value && (!form.value.sell_price || form.value.sell_price <= 0)) {
+  if (!usePrediction.value && (!form.value.sell_price || parseFloat(form.value.sell_price) <= 0)) {
     calcError.value = 'Masukkan harga jual yang valid.';
     return;
   }
 
   calculating.value = true;
-  calcError.value = '';
   narrationResult.value = '';
   narrationError.value = false;
   
   const payload = getPayload();
-  console.log('Payload:', payload); // debug
+  console.log('Sending payload:', JSON.stringify(payload));
   
-  calcEndpoint.fetch(payload).then(() => {
-    resultData.value = calcEndpoint.data.value;
-    calcError.value = calcEndpoint.error.value;
-    calculating.value = false;
-  });
+  await calcEndpoint.fetch(payload);
+  resultData.value = calcEndpoint.data.value;
+  if (calcEndpoint.error.value) {
+    const err = calcEndpoint.error.value;
+    const statusCode = err.statusCode || err.status || (err.response && err.response.status);
+    
+    if (statusCode === 422) {
+      calcError.value = 'Input tidak valid. Pastikan harga beli dan jumlah lot sudah diisi dengan benar.';
+    } else if (statusCode === 500 || (err.message && err.message.toLowerCase().includes('network')) || err.name === 'FetchError') {
+      calcError.value = 'Server sedang tidak tersedia. Coba beberapa saat lagi.';
+    } else {
+      calcError.value = 'Gagal menghitung simulasi. Silakan coba lagi.';
+    }
+  }
+  calculating.value = false;
 };
 
 const fetchNarration = async () => {
