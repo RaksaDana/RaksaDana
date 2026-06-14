@@ -216,12 +216,31 @@ const getPayload = () => {
 };
 
 const submitForm = async () => {
+  // Validasi input
+  if (!form.value.ticker) {
+    calcError.value = 'Pilih saham terlebih dahulu.';
+    return;
+  }
+  if (!form.value.buy_price || form.value.buy_price <= 0) {
+    calcError.value = 'Masukkan harga beli yang valid.';
+    return;
+  }
+  if (!form.value.lots || form.value.lots <= 0) {
+    calcError.value = 'Masukkan jumlah lot yang valid.';
+    return;
+  }
+  if (!usePrediction.value && (!form.value.sell_price || form.value.sell_price <= 0)) {
+    calcError.value = 'Masukkan harga jual yang valid.';
+    return;
+  }
+
   calculating.value = true;
   calcError.value = '';
   narrationResult.value = '';
   narrationError.value = false;
   
   const payload = getPayload();
+  console.log('Payload:', payload); // debug
   
   calcEndpoint.fetch(payload).then(() => {
     resultData.value = calcEndpoint.data.value;
