@@ -1,9 +1,12 @@
 import asyncio
+import os
 from contextlib import asynccontextmanager
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from src import inference
@@ -178,3 +181,11 @@ async def profit_loss(body: ProfitLossRequest, narrate: bool = Query(False)):
             result["narration"] = f"Narasi tidak tersedia: {e}"
 
     return result
+
+
+if os.path.exists("frontend/dist"):
+    app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        return FileResponse("frontend/dist/index.html")
