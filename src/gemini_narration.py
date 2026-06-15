@@ -58,13 +58,18 @@ def _generate(system_instruction: str, prompt: str) -> str:
                     max_output_tokens=8192,
                 ),
             )
-            return response.text
+            text = response.text
+            if not text:
+                raise ValueError("Empty response from model (safety filter or no content)")
+            return text
         except errors.ClientError as e:
             if e.code != 429:
                 raise
             last_error = e
         except errors.ServerError as e:
             last_error = e
+    if last_error is None:
+        raise RuntimeError("No API clients available")
     raise last_error
 
 
