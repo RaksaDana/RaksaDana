@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
     public: {
-      apiBase: 'https://chelsy12-raksadana-api.hf.space'
+      apiBase: 'https://raksadana-raksadana-api.hf.space'
     }
   },
   app: {
