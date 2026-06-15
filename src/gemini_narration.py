@@ -1,9 +1,9 @@
 import os
 
 from google import genai
-from google.genai import types
+from google.genai import errors, types
 
-_client: genai.Client | None = None
+_MODEL = "gemma-4-31b-it"
 
 _PREDICTION_SYSTEM = (
     "Kamu adalah analis investasi saham Indonesia yang berpengalaman. "
@@ -24,15 +24,46 @@ _PROFIT_LOSS_SYSTEM = (
     "Selalu sertakan disclaimer bahwa ini adalah estimasi, bukan jaminan keuntungan."
 )
 
+_clients: list[genai.Client] | None = None
 
-def _get_client() -> genai.Client:
-    global _client
-    if _client is None:
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
+
+def _get_clients() -> list[genai.Client]:
+    global _clients
+    if _clients is None:
+        keys = []
+        for name in ("GEMINI_API_KEY", "GEMINI_API_KEY_2"):
+            key = os.getenv(name)
+            if key:
+                keys.append(key)
+        if not keys:
             raise RuntimeError("GEMINI_API_KEY not set")
-        _client = genai.Client(api_key=api_key)
-    return _client
+        _clients = [genai.Client(api_key=key) for key in keys]
+    return _clients
+
+
+def _generate(system_instruction: str, prompt: str) -> str:
+    """Generate narration, falling back to the next API key on rate limit (429)
+    or transient server error (5xx). Re-raises the last error if every key fails."""
+    last_error: Exception | None = None
+    for client in _get_clients():
+        try:
+            response = client.models.generate_content(
+                model=_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=1.0,
+                    max_output_tokens=8192,
+                ),
+            )
+            return response.text
+        except errors.ClientError as e:
+            if e.code != 429:
+                raise
+            last_error = e
+        except errors.ServerError as e:
+            last_error = e
+    raise last_error
 
 
 def generate_prediction_narration(ticker: str, prediction: dict, metrics: dict) -> str:
@@ -50,16 +81,7 @@ def generate_prediction_narration(ticker: str, prediction: dict, metrics: dict) 
         f"- Return RMSE: {metrics.get('return_rmse', 'N/A')}\n\n"
         "Buat narasi investasi singkat dalam bahasa Indonesia."
     )
-    response = _get_client().models.generate_content(
-        model="gemma-4-31b-it",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=_PREDICTION_SYSTEM,
-            temperature=1.0,
-            max_output_tokens=8192,
-        ),
-    )
-    return response.text
+    return _generate(_PREDICTION_SYSTEM, prompt)
 
 
 def generate_profit_loss_narration(
@@ -81,13 +103,4 @@ def generate_profit_loss_narration(
         f"- Akurasi Arah: {metrics.get('direction_accuracy', 'N/A')}%\n\n"
         "Buat narasi kalkulasi profit/loss dalam bahasa Indonesia."
     )
-    response = _get_client().models.generate_content(
-        model="gemma-4-31b-it",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=_PROFIT_LOSS_SYSTEM,
-            temperature=1.0,
-            max_output_tokens=8192,
-        ),
-    )
-    return response.text
+    return _generate(_PROFIT_LOSS_SYSTEM, prompt)
