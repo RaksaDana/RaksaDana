@@ -160,7 +160,7 @@ const statusTextClass = computed(() => {
 const animateCounters = () => {
   if (props.result) {
     gsap.to(displayNetProfit, { value: props.result.net_profit_loss, duration: 0.8, ease: 'power2.out' });
-    gsap.to(displayReturn, { value: props.result.net_return_pct * 100, duration: 0.8, ease: 'power2.out' });
+    gsap.to(displayReturn, { value: props.result.net_return_pct, duration: 0.8, ease: 'power2.out' });
   }
 };
 

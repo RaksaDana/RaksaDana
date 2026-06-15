@@ -34,11 +34,12 @@ export const useApi = () => {
       const loading = ref(false);
       const error = ref(null);
 
-      const fetch = async () => {
+      const fetch = async (...fetchArgs) => {
         loading.value = true;
         error.value = null;
         try {
-          const response = await withRetry(() => requestFnBuilder(...args)());
+          const finalArgs = fetchArgs.length > 0 ? fetchArgs : args;
+          const response = await withRetry(() => requestFnBuilder(...finalArgs)());
           data.value = response.data;
         } catch (err) {
           const detail = err.response?.data?.detail;

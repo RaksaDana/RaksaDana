@@ -254,15 +254,7 @@ const submitForm = async () => {
   resultData.value = calcEndpoint.data.value;
   if (calcEndpoint.error.value) {
     const err = calcEndpoint.error.value;
-    const statusCode = err.statusCode || err.status || (err.response && err.response.status);
-    
-    if (statusCode === 422) {
-      calcError.value = 'Input tidak valid. Pastikan harga beli dan jumlah lot sudah diisi dengan benar.';
-    } else if (statusCode === 500 || (err.message && err.message.toLowerCase().includes('network')) || err.name === 'FetchError') {
-      calcError.value = 'Server sedang tidak tersedia. Coba beberapa saat lagi.';
-    } else {
-      calcError.value = 'Gagal menghitung simulasi. Silakan coba lagi.';
-    }
+    calcError.value = typeof err === 'string' ? err : 'Gagal menghitung simulasi. Silakan coba lagi.';
   }
   calculating.value = false;
 };
