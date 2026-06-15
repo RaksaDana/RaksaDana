@@ -140,3 +140,25 @@ def test_non_rate_limit_client_error_not_retried():
     with pytest.raises(errors.ClientError):
         gn.generate_prediction_narration("BBCA.JK", _PREDICTION, _METRICS)
     healthy.models.generate_content.assert_not_called()
+
+
+def test_raises_on_empty_response_text():
+    import src.gemini_narration as gn
+
+    mock_resp = MagicMock()
+    mock_resp.text = None
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = mock_resp
+    gn._clients = [mock_client]
+
+    with pytest.raises(ValueError, match="Empty response"):
+        gn.generate_prediction_narration("BBCA.JK", _PREDICTION, _METRICS)
+
+
+def test_raises_runtime_error_when_no_clients():
+    import src.gemini_narration as gn
+
+    gn._clients = []
+
+    with pytest.raises(RuntimeError, match="No API clients available"):
+        gn.generate_prediction_narration("BBCA.JK", _PREDICTION, _METRICS)
