@@ -41,6 +41,7 @@ def reset_clients():
 def test_get_clients_raises_without_api_key(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     monkeypatch.delenv("GEMINI_API_KEY_2", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY_3", raising=False)
     import src.gemini_narration as gn
     with pytest.raises(RuntimeError, match="GEMINI_API_KEY not set"):
         gn._get_clients()

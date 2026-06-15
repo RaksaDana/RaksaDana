@@ -31,7 +31,9 @@ def _get_clients() -> list[genai.Client]:
     global _clients
     if _clients is None:
         keys = []
-        for name in ("GEMINI_API_KEY", "GEMINI_API_KEY_2"):
+        # Dedicated fallback keys are tried first; GEMINI_API_KEY holds the
+        # shared last-resort key (e.g. a teammate's), so it is attempted last.
+        for name in ("GEMINI_API_KEY_2", "GEMINI_API_KEY_3", "GEMINI_API_KEY"):
             key = os.getenv(name)
             if key:
                 keys.append(key)
