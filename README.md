@@ -116,6 +116,15 @@ RaksaDana/
 
 ---
 
+**Prediksi vs Aktual — BBCA**
+![BBCA Prediction](outputs/figures/BBCA_JK/return_BBCA_JK_prediction_vs_actual.png)
+
+**30-Day Forecast — BBCA**
+![BBCA Forecast](outputs/figures/BBCA_JK/return_BBCA_JK_lstm_return_prediction.png)
+
+**Performance Dashboard (3 Ticker)**
+![Dashboard](outputs/figures/evaluation/performance_dashboard.png)
+
 ## Cara Mereplikasi Proyek
 
 ### Prasyarat
